@@ -10,26 +10,45 @@ int main()
     {
         cin >> it[0] >> it[1] >> it[2];
     }
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    vector<int> dist(n + 1, INT_MAX);
-    dist[0] = -1;
-    dist[1] = 0;
-    pq.push({0, 1});
-    while (!pq.empty())
-    {
-        int dis = pq.top().first;
-        int node = pq.top().second;
+    priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;
+    vector<pair<int,int>> dist(n+1,{INT_MAX,INT_MAX});
+    dist[0].first=0;
+    pq.push({0,route[0][0],0});
+    while(!pq.empty()){
+        int state=pq.top()[2];
+        int cost=pq.top()[0];
+        int node=pq.top()[1]; 
         pq.pop();
-        // node er neighbour gulo khuji whole vector e and relax them
-        for (auto it : route)
-        {
-            if (it[0] == node && dist[node] + it[2] < dist[it[1]])
-            {
-                dist[it[1]] = dist[node] + it[2]; // dis==it[2],,it[1]==dest,,it[0]==node
-                pq.push({dis, it[1]});
+        if(!state){
+            for(auto it:route){
+                if(it[0]==node){
+                    int dest=it[1];
+                    int pathCost=it[2];
+                    if(pathCost+cost<dist[dest].first){
+                        dist[dest].first=it[2]+cost;
+                        pq.push({dist[dest].first,dest,0});
+                    } 
+                    if(pathCost/2+cost<dist[dest].second){
+                       dist[dest].second=pathCost/2+cost;
+                       pq.push({dist[dest].second,dest,1});
+                    }
+
+                }
+            }
+        }
+        else{
+            for(auto it:route){
+                if(it[0]==node){
+                    int dest=it[1];
+                    int pathCost=it[2];
+                    if(pathCost+cost<dist[dest].first){
+                        dist[dest].first=it[2]+cost;
+                        pq.push({dist[dest].first,dest,0});
+                    } 
+                }
             }
         }
     }
-    for(int i:dist) cout<<i<<" ";
+cout<<min(dist[n].first,dist[n].second);
     return 0;
 }
