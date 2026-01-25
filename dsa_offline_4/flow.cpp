@@ -69,7 +69,7 @@ int main(){
         int u,v,c;
         cin>>u>>v>>c;
         //idx and (int)graph[v].size()
-        //this thing's purpose is completely different
+        //this thing's purpose is completely different 
         int idx = graph[u].size();
         edges.push_back({u, v, c, idx});
         graph[u].push_back({v,c,(int)graph[v].size()});
