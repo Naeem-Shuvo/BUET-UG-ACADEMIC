@@ -1,0 +1,5 @@
+# No external dependencies required
+# All implementations use Python standard library only
+
+# Python version requirement:
+# Python >= 3.6
