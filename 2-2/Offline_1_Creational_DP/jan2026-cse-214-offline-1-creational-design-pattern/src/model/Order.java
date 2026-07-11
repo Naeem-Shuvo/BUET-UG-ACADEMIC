@@ -8,12 +8,6 @@ import java.util.Objects;
 
 /**
  * Represents a placed food order.
- *
- * Design note for the assignment:
- * This class works, but its construction API is intentionally awkward.
- * The long constructor mixes required fields, optional fields, defaults,
- * validation, and pricing flags. Students should refactor this design without
- * changing the observable behavior of the program.
  */
 public class Order {
     public static final double DELIVERY_FEE = 80.0;
@@ -35,6 +29,37 @@ public class Order {
     private final List<OrderItem> items;
     private final String specialInstructions;
 
+    private Order(Builder builder) {
+        this.orderId = requireNonBlank(builder.orderId, "Order id");
+        this.customerName = requireNonBlank(builder.customerName, "Customer name");
+        this.phone = requireNonBlank(builder.phone, "Phone");
+        this.deliveryType = builder.deliveryType != null ? builder.deliveryType : DeliveryType.PICKUP;
+        this.paymentMethod = builder.paymentMethod != null ? builder.paymentMethod : PaymentMethod.CASH;
+        this.scheduledTime = builder.scheduledTime;
+        this.couponCode = builder.couponCode != null ? builder.couponCode.trim().toUpperCase() : "";
+        this.giftWrap = builder.giftWrap;
+        this.cutleryRequired = builder.cutleryRequired;
+        this.loyaltyPointsToRedeem = Math.max(0, builder.loyaltyPointsToRedeem);
+        this.rushOrder = builder.rushOrder;
+        this.specialInstructions = builder.specialInstructions != null ? builder.specialInstructions.trim() : "";
+
+        if (this.deliveryType == DeliveryType.DELIVERY) {
+            this.deliveryAddress = requireNonBlank(builder.deliveryAddress, "Delivery address");
+        } else {
+            this.deliveryAddress = builder.deliveryAddress != null ? builder.deliveryAddress.trim() : "";
+        }
+
+        Objects.requireNonNull(builder.items, "Items cannot be null");
+        if (builder.items.isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
+        this.items = Collections.unmodifiableList(new ArrayList<>(builder.items));
+    }
+
+    /**
+     * @deprecated Use {@link Order.Builder} instead.
+     */
+    @Deprecated
     public Order(String orderId,
                  String customerName,
                  String phone,
@@ -49,35 +74,25 @@ public class Order {
                  boolean rushOrder,
                  List<OrderItem> items,
                  String specialInstructions) {
-        this.orderId = requireNonBlank(orderId, "Order id");
-        this.customerName = requireNonBlank(customerName, "Customer name");
-        this.phone = requireNonBlank(phone, "Phone");
-        this.deliveryType = deliveryType != null ? deliveryType : DeliveryType.PICKUP;
-        this.paymentMethod = paymentMethod != null ? paymentMethod : PaymentMethod.CASH;
-        this.scheduledTime = scheduledTime;
-        this.couponCode = couponCode != null ? couponCode.trim().toUpperCase() : "";
-        this.giftWrap = giftWrap;
-        this.cutleryRequired = cutleryRequired;
-        this.loyaltyPointsToRedeem = Math.max(0, loyaltyPointsToRedeem);
-        this.rushOrder = rushOrder;
-        this.specialInstructions = specialInstructions != null ? specialInstructions.trim() : "";
-
-        if (this.deliveryType == DeliveryType.DELIVERY) {
-            this.deliveryAddress = requireNonBlank(deliveryAddress, "Delivery address");
-        } else {
-            this.deliveryAddress = deliveryAddress != null ? deliveryAddress.trim() : "";
-        }
-
-        Objects.requireNonNull(items, "Items cannot be null");
-        if (items.isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one item");
-        }
-        this.items = Collections.unmodifiableList(new ArrayList<>(items));
+        this(new Builder(orderId, customerName, phone, items)
+                .deliveryType(deliveryType)
+                .deliveryAddress(deliveryAddress)
+                .paymentMethod(paymentMethod)
+                .scheduledTime(scheduledTime)
+                .couponCode(couponCode)
+                .giftWrap(giftWrap)
+                .cutleryRequired(cutleryRequired)
+                .loyaltyPointsToRedeem(loyaltyPointsToRedeem)
+                .rushOrder(rushOrder)
+                .specialInstructions(specialInstructions));
     }
 
+    /**
+     * @deprecated Use {@link Order.Builder} instead.
+     */
+    @Deprecated
     public Order(String orderId, String customerName, String phone, List<OrderItem> items) {
-        this(orderId, customerName, phone, DeliveryType.PICKUP, "", PaymentMethod.CASH,
-                null, "", false, true, 0, false, items, "");
+        this(new Builder(orderId, customerName, phone, items));
     }
 
     public String getOrderId() {
@@ -177,5 +192,88 @@ public class Order {
             throw new IllegalArgumentException(fieldName + " cannot be blank");
         }
         return trimmed;
+    }
+
+    public static class Builder {
+        private final String orderId;
+        private final String customerName;
+        private final String phone;
+        private final List<OrderItem> items;
+
+        private DeliveryType deliveryType = DeliveryType.PICKUP;
+        private String deliveryAddress = "";
+        private PaymentMethod paymentMethod = PaymentMethod.CASH;
+        private LocalDateTime scheduledTime = null;
+        private String couponCode = "";
+        private boolean giftWrap = false;
+        private boolean cutleryRequired = true;
+        private int loyaltyPointsToRedeem = 0;
+        private boolean rushOrder = false;
+        private String specialInstructions = "";
+
+        public Builder(String orderId, String customerName, String phone, List<OrderItem> items) {
+            this.orderId = requireNonBlank(orderId, "Order id");
+            this.customerName = requireNonBlank(customerName, "Customer name");
+            this.phone = requireNonBlank(phone, "Phone");
+            Objects.requireNonNull(items, "Items cannot be null");
+            if (items.isEmpty()) {
+                throw new IllegalArgumentException("Order must contain at least one item");
+            }
+            this.items = Collections.unmodifiableList(new ArrayList<>(items));
+        }
+
+        public Builder deliveryType(DeliveryType deliveryType) {
+            this.deliveryType = deliveryType;
+            return this;
+        }
+
+        public Builder deliveryAddress(String deliveryAddress) {
+            this.deliveryAddress = deliveryAddress;
+            return this;
+        }
+
+        public Builder paymentMethod(PaymentMethod paymentMethod) {
+            this.paymentMethod = paymentMethod;
+            return this;
+        }
+
+        public Builder scheduledTime(LocalDateTime scheduledTime) {
+            this.scheduledTime = scheduledTime;
+            return this;
+        }
+
+        public Builder couponCode(String couponCode) {
+            this.couponCode = couponCode;
+            return this;
+        }
+
+        public Builder giftWrap(boolean giftWrap) {
+            this.giftWrap = giftWrap;
+            return this;
+        }
+
+        public Builder cutleryRequired(boolean cutleryRequired) {
+            this.cutleryRequired = cutleryRequired;
+            return this;
+        }
+
+        public Builder loyaltyPointsToRedeem(int loyaltyPointsToRedeem) {
+            this.loyaltyPointsToRedeem = loyaltyPointsToRedeem;
+            return this;
+        }
+
+        public Builder rushOrder(boolean rushOrder) {
+            this.rushOrder = rushOrder;
+            return this;
+        }
+
+        public Builder specialInstructions(String specialInstructions) {
+            this.specialInstructions = specialInstructions;
+            return this;
+        }
+
+        public Order build() {
+            return new Order(this);
+        }
     }
 }

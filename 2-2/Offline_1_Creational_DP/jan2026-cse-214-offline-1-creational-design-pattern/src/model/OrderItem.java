@@ -15,16 +15,28 @@ public class OrderItem {
     private final boolean spicy;
     private final String note;
 
-    public OrderItem(MenuItem menuItem, int quantity, Size size, boolean extraCheese, boolean spicy, String note) {
-        this.menuItem = Objects.requireNonNull(menuItem, "Menu item cannot be null");
-        if (quantity <= 0) {
+    private OrderItem(Builder builder) {
+        this.menuItem = Objects.requireNonNull(builder.menuItem, "Menu item cannot be null");
+        if (builder.quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
-        this.quantity = quantity;
-        this.size = size != null ? size : Size.MEDIUM;
-        this.extraCheese = extraCheese;
-        this.spicy = spicy;
-        this.note = note != null ? note.trim() : "";
+        this.quantity = builder.quantity;
+        this.size = builder.size != null ? builder.size : Size.MEDIUM;
+        this.extraCheese = builder.extraCheese;
+        this.spicy = builder.spicy;
+        this.note = builder.note != null ? builder.note.trim() : "";
+    }
+
+    /**
+     * @deprecated Use {@link OrderItem.Builder} instead.
+     */
+    @Deprecated
+    public OrderItem(MenuItem menuItem, int quantity, Size size, boolean extraCheese, boolean spicy, String note) {
+        this(new Builder(menuItem, quantity)
+                .size(size)
+                .extraCheese(extraCheese)
+                .spicy(spicy)
+                .note(note));
     }
 
     public MenuItem getMenuItem() {
@@ -85,5 +97,45 @@ public class OrderItem {
                 describeOptions(),
                 getSubtotal());
     }
-}
 
+    public static class Builder {
+        private final MenuItem menuItem;
+        private final int quantity;
+        private Size size = Size.MEDIUM;
+        private boolean extraCheese = false;
+        private boolean spicy = false;
+        private String note = "";
+
+        public Builder(MenuItem menuItem, int quantity) {
+            this.menuItem = Objects.requireNonNull(menuItem, "Menu item cannot be null");
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("Quantity must be positive");
+            }
+            this.quantity = quantity;
+        }
+
+        public Builder size(Size size) {
+            this.size = size;
+            return this;
+        }
+
+        public Builder extraCheese(boolean extraCheese) {
+            this.extraCheese = extraCheese;
+            return this;
+        }
+
+        public Builder spicy(boolean spicy) {
+            this.spicy = spicy;
+            return this;
+        }
+
+        public Builder note(String note) {
+            this.note = note;
+            return this;
+        }
+
+        public OrderItem build() {
+            return new OrderItem(this);
+        }
+    }
+}
