@@ -27,10 +27,6 @@ public class OrderItem {
         this.note = builder.note != null ? builder.note.trim() : "";
     }
 
-    /**
-     * @deprecated Use {@link OrderItem.Builder} instead.
-     */
-    @Deprecated
     public OrderItem(MenuItem menuItem, int quantity, Size size, boolean extraCheese, boolean spicy, String note) {
         this(new Builder(menuItem, quantity)
                 .size(size)

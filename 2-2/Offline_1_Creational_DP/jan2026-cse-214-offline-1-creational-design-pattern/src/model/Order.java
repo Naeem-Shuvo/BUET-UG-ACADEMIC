@@ -56,24 +56,20 @@ public class Order {
         this.items = Collections.unmodifiableList(new ArrayList<>(builder.items));
     }
 
-    /**
-     * @deprecated Use {@link Order.Builder} instead.
-     */
-    @Deprecated
     public Order(String orderId,
-                 String customerName,
-                 String phone,
-                 DeliveryType deliveryType,
-                 String deliveryAddress,
-                 PaymentMethod paymentMethod,
-                 LocalDateTime scheduledTime,
-                 String couponCode,
-                 boolean giftWrap,
-                 boolean cutleryRequired,
-                 int loyaltyPointsToRedeem,
-                 boolean rushOrder,
-                 List<OrderItem> items,
-                 String specialInstructions) {
+            String customerName,
+            String phone,
+            DeliveryType deliveryType,
+            String deliveryAddress,
+            PaymentMethod paymentMethod,
+            LocalDateTime scheduledTime,
+            String couponCode,
+            boolean giftWrap,
+            boolean cutleryRequired,
+            int loyaltyPointsToRedeem,
+            boolean rushOrder,
+            List<OrderItem> items,
+            String specialInstructions) {
         this(new Builder(orderId, customerName, phone, items)
                 .deliveryType(deliveryType)
                 .deliveryAddress(deliveryAddress)
@@ -87,10 +83,6 @@ public class Order {
                 .specialInstructions(specialInstructions));
     }
 
-    /**
-     * @deprecated Use {@link Order.Builder} instead.
-     */
-    @Deprecated
     public Order(String orderId, String customerName, String phone, List<OrderItem> items) {
         this(new Builder(orderId, customerName, phone, items));
     }
@@ -193,6 +185,9 @@ public class Order {
         }
         return trimmed;
     }
+    // static na korle paradox e porto , order class create er time builder object
+    // pass korte hoy
+    // order object chara ta possible hoto na
 
     public static class Builder {
         private final String orderId;
