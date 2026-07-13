@@ -1,10 +1,8 @@
 package service;
 
-import model.DeliveryType;
 import model.MenuItem;
 import model.Order;
 import model.OrderItem;
-import model.PaymentMethod;
 import model.Size;
 
 import java.time.LocalDateTime;
